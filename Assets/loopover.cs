@@ -17,24 +17,34 @@ public class loopover : MonoBehaviour
 
     public Renderer[] tiles;
     public Material[] tileColors;
-    public String[] letters;
+    public string[] letters;
     public TextMesh[] tileLetters;
-    private string[] solveState = new string[25] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y" };
+    private static readonly string[] solveState = new string[25] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y" };
     private string[] currentState;
     public KMSelectable[] negvertibuttons;
     public KMSelectable[] posvertibuttons;
     public KMSelectable[] poshoributtons;
     public KMSelectable[] neghoributtons;
 
-    KMSelectable.OnInteractHandler buttonHandler(KMSelectable arrow, Action<KMSelectable> method)
+    sealed class Shift
+    {
+        public bool Row;
+        public int Index;
+        public int Direction;
+        public string[] State;
+    }
+
+    private readonly Queue<Shift> _animationQueue = new Queue<Shift>();
+
+    KMSelectable.OnInteractHandler buttonHandler(bool row, int index, int direction, KMSelectable arrow, Action<KMSelectable> method)
     {
         return delegate ()
         {
-            Audio.PlaySoundAtTransform("tick", arrow.transform);
             if (!moduleSolved)
             {
+                Audio.PlaySoundAtTransform("tick", arrow.transform);
                 method(arrow);
-                tileState();
+                _animationQueue.Enqueue(new Shift { Row = row, Index = index, Direction = direction, State = currentState.ToArray() });
             }
             return false;
         };
@@ -43,21 +53,75 @@ public class loopover : MonoBehaviour
     void Awake()
     {
         moduleId = moduleIdCounter++;
-        foreach (KMSelectable arrow in negvertibuttons)
+        for (var i = 0; i < negvertibuttons.Length; i++)
         {
-            arrow.OnInteract += buttonHandler(arrow, negvertiPress);
+            negvertibuttons[i].OnInteract += buttonHandler(false, i, 1, negvertibuttons[i], negvertiPress);
         }
-        foreach (KMSelectable arrow in posvertibuttons)
+        for (var i = 0; i < posvertibuttons.Length; i++)
         {
-            arrow.OnInteract += buttonHandler(arrow, posvertiPress);
+            posvertibuttons[i].OnInteract += buttonHandler(false, i, -1, posvertibuttons[i], posvertiPress);
         }
-        foreach (KMSelectable arrow in poshoributtons)
+        for (var i = 0; i < poshoributtons.Length; i++)
         {
-            arrow.OnInteract += buttonHandler(arrow, poshoriPress);
+            poshoributtons[i].OnInteract += buttonHandler(true, i, 1, poshoributtons[i], poshoriPress);
         }
-        foreach (KMSelectable arrow in neghoributtons)
+        for (var i = 0; i < neghoributtons.Length; i++)
         {
-            arrow.OnInteract += buttonHandler(arrow, neghoriPress);
+            neghoributtons[i].OnInteract += buttonHandler(true, i, -1, neghoributtons[i], neghoriPress);
+        }
+        StartCoroutine(animate());
+    }
+
+    private IEnumerator animate()
+    {
+        while (!moduleSolved)
+        {
+            while (_animationQueue.Count == 0)
+                yield return null;
+
+            var item = _animationQueue.Dequeue();
+
+            const float duration = .15f;
+            float elapsed = 0;
+            if (item.Direction == -1)
+            {
+                setBoard(item.State);
+                while (elapsed < duration)
+                {
+                    for (var i = 0; i < 5; i++)
+                    {
+                        var tileToMove = tiles[item.Row ? (5 * item.Index + i) : (item.Index + 5 * i)];
+                        var newPosition = new Vector3(
+                            -4f + (item.Row ? i : item.Index) * 2.2f + (item.Row ? 2.2f * elapsed / duration - 2.2f : 0) * item.Direction,
+                            2.05f - (item.Row ? item.Index : i) * 2.2f + (item.Row ? 0 : 2.2f * elapsed / duration - 2.2f) * item.Direction,
+                            0);
+                        tileToMove.transform.localPosition = newPosition;
+                    }
+                    yield return null;
+                    elapsed += Time.deltaTime;
+                }
+            }
+            else
+            {
+                while (elapsed < duration)
+                {
+                    for (var i = 0; i < 5; i++)
+                    {
+                        var tileToMove = tiles[item.Row ? (5 * item.Index + i) : (item.Index + 5 * i)];
+                        var newPosition = new Vector3(
+                            -4f + (item.Row ? i : item.Index) * 2.2f + (item.Row ? 2.2f * elapsed / duration : 0) * item.Direction,
+                            2.05f - (item.Row ? item.Index : i) * 2.2f + (item.Row ? 0 : 2.2f * elapsed / duration) * item.Direction,
+                            0);
+                        tileToMove.transform.localPosition = newPosition;
+                    }
+                    yield return null;
+                    elapsed += Time.deltaTime;
+                }
+                setBoard(item.State);
+            }
+
+            for (var i = 0; i < 25; i++)
+                tiles[i].transform.localPosition = new Vector3(-4f + 2.2f * (i % 5), 2.05f - 2.2f * (i / 5), 0);
         }
     }
 
@@ -82,19 +146,19 @@ public class loopover : MonoBehaviour
                     break;
             }
         }
-        tileState();
+        setBoard(currentState);
     }
 
-    void tileState()
+    void setBoard(string[] state)
     {
         for (int i = 0; i <= 24; i++)
         {
             var letter = solveState[i];
-            var m = Array.IndexOf(currentState, letter);
+            var m = Array.IndexOf(state, letter);
             tiles[m].material = tileColors[i];
             tileLetters[m].text = solveState[i];
         }
-        if (currentState.SequenceEqual(solveState))
+        if (state.SequenceEqual(solveState))
         {
             GetComponent<KMBombModule>().HandlePass();
             Debug.LogFormat("[Loopover #{0}] Module solved.", moduleId);
