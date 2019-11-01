@@ -31,7 +31,7 @@ public class loopover : MonoBehaviour
         return delegate ()
         {
             Audio.PlaySoundAtTransform("tick", arrow.transform);
-            arrow.AddInteractionPunch();
+            arrow.AddInteractionPunch(.5f);
             if (!moduleSolved)
             {
                 method(arrow);
