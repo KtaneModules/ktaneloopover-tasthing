@@ -31,7 +31,6 @@ public class loopover : MonoBehaviour
         return delegate ()
         {
             Audio.PlaySoundAtTransform("tick", arrow.transform);
-            arrow.AddInteractionPunch(.5f);
             if (!moduleSolved)
             {
                 method(arrow);
@@ -99,6 +98,7 @@ public class loopover : MonoBehaviour
         {
             GetComponent<KMBombModule>().HandlePass();
             Debug.LogFormat("[Loopover #{0}] Module solved.", moduleId);
+            Audio.PlaySoundAtTransform("solve", transform);
             moduleSolved = true;
         }
     }
