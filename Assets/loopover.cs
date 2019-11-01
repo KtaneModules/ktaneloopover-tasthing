@@ -30,7 +30,7 @@ public class loopover : MonoBehaviour
     {
         return delegate ()
         {
-            Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+            Audio.PlaySoundAtTransform("tick", arrow.transform);
             arrow.AddInteractionPunch();
             if (!moduleSolved)
             {
