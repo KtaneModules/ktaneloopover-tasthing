@@ -14,7 +14,18 @@ MonoBehaviour:
   id: loopover
   title: Loopover
   author: TasThing
-  description: 
+  description: 'o follow the module''s gimmick? Did you expect this flavor text t
+
+
+    Use the arrow buttons to shift the rows and columns to arrange the 25 tiles into
+    alphabetical order.
+
+
+    Module implemented by TasThing.
+
+    Based on Carykh''s creation, which can be played here:
+
+    https://www.openprocessing.org/sketch/580366/'
   version: 
   outputFolder: build
-  previewImage: {fileID: 0}
+  previewImage: {fileID: 2800000, guid: c30634dc7e565374d84c04090054c2a4, type: 3}
