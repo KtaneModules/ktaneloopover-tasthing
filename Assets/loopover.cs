@@ -247,4 +247,263 @@ public class loopover : MonoBehaviour
       }
     }*/
 
+    //twitch plays
+    private bool paramsValid(string[] prms)
+    {
+        string[] validsRows = { "row1", "row2", "row3", "row4", "row5" };
+        string[] validsCols = { "col1", "col2", "col3", "col4", "col5" };
+        string[] validsLeftsRights = { "l1", "l2", "l3", "l4", "l5", "r1", "r2", "r3", "r4", "r5" };
+        string[] validsUpsDowns = { "u1", "u2", "u3", "u4", "u5", "d1", "d2", "d3", "d4", "d5" };
+        if(prms.Length % 2 != 0)
+        {
+            return false;
+        }
+        for(int i = 1; i < prms.Length; i += 2)
+        {
+            if (!validsCols.Contains(prms[i - 1]) && !validsRows.Contains(prms[i - 1]))
+            {
+                return false;
+            }
+            if (validsCols.Contains(prms[i - 1]))
+            {
+                if (!validsUpsDowns.Contains(prms[i])){
+                    return false;
+                }
+            }
+            else if (validsRows.Contains(prms[i - 1]))
+            {
+                if (!validsLeftsRights.Contains(prms[i]))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    #pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} row<#> l/r<#2> [Moves left/right '#2' times in row '#'] | !{0} col<#> u/d<#2> [Moves up/down '#2' times in column '#'] | Commands are chainable, for ex: !{0} row1 l3 col1 d1";
+    #pragma warning restore 414
+
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        string[] parameters = command.Split(' ');
+        if (paramsValid(parameters))
+        {
+            yield return null;
+            for(int i = 0; i < parameters.Length-1; i++)
+            {
+                if (parameters[i].EqualsIgnoreCase("col1"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i+1].Substring(1, 1), out temp);
+                    if(parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("u"))
+                    {
+                        for(int j = 0; j < temp; j++)
+                        {
+                            negvertibuttons[0].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("d"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            posvertibuttons[0].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("col2"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("u"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            negvertibuttons[1].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("d"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            posvertibuttons[1].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("col3"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("u"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            negvertibuttons[2].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("d"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            posvertibuttons[2].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("col4"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("u"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            negvertibuttons[3].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("d"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            posvertibuttons[3].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("col5"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("u"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            negvertibuttons[4].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("d"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            posvertibuttons[4].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("row1"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("l"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            neghoributtons[0].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("r"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            poshoributtons[0].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("row2"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("l"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            neghoributtons[1].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("r"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            poshoributtons[1].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("row3"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("l"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            neghoributtons[2].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("r"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            poshoributtons[2].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("row4"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("l"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            neghoributtons[3].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("r"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            poshoributtons[3].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+                else if (parameters[i].EqualsIgnoreCase("row5"))
+                {
+                    int temp = 0;
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("l"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            neghoributtons[4].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("r"))
+                    {
+                        for (int j = 0; j < temp; j++)
+                        {
+                            poshoributtons[4].OnInteract();
+                            yield return new WaitForSeconds(0.1f);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
