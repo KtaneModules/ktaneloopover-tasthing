@@ -53,22 +53,14 @@ public class loopover : MonoBehaviour
     void Awake()
     {
         moduleId = moduleIdCounter++;
-        for (var i = 0; i < negvertibuttons.Length; i++)
-        {
+        for (int i = 0; i < negvertibuttons.Length; i++)
             negvertibuttons[i].OnInteract += buttonHandler(false, i, 1, negvertibuttons[i], negvertiPress);
-        }
-        for (var i = 0; i < posvertibuttons.Length; i++)
-        {
+        for (int i = 0; i < posvertibuttons.Length; i++)
             posvertibuttons[i].OnInteract += buttonHandler(false, i, -1, posvertibuttons[i], posvertiPress);
-        }
-        for (var i = 0; i < poshoributtons.Length; i++)
-        {
+        for (int i = 0; i < poshoributtons.Length; i++)
             poshoributtons[i].OnInteract += buttonHandler(true, i, 1, poshoributtons[i], poshoriPress);
-        }
-        for (var i = 0; i < neghoributtons.Length; i++)
-        {
+        for (int i = 0; i < neghoributtons.Length; i++)
             neghoributtons[i].OnInteract += buttonHandler(true, i, -1, neghoributtons[i], neghoriPress);
-        }
         StartCoroutine(animate());
     }
 
