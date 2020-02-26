@@ -8207,8 +8207,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ea758ce3f01a346bb158e1e834f6e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Audio: {fileID: 114362555509535318}
+  audio: {fileID: 114362555509535318}
   bomb: {fileID: 114212602564178874}
+  module: {fileID: 114221075226099596}
   tiles:
   - {fileID: 23697534169507558}
   - {fileID: 23083538724156588}

@@ -8,8 +8,9 @@ using rnd = UnityEngine.Random;
 
 public class loopover : MonoBehaviour
 {
-    public KMAudio Audio;
+    public new KMAudio audio;
     public KMBombInfo bomb;
+    public KMBombModule module;
 
     static int moduleIdCounter = 1;
     int moduleId;
@@ -42,7 +43,7 @@ public class loopover : MonoBehaviour
         {
             if (!moduleSolved)
             {
-                Audio.PlaySoundAtTransform("tick", arrow.transform);
+                audio.PlaySoundAtTransform("tick", arrow.transform);
                 method(arrow);
                 _animationQueue.Enqueue(new Shift { Row = row, Index = index, Direction = direction, State = currentState.ToArray() });
             }
@@ -152,9 +153,9 @@ public class loopover : MonoBehaviour
         }
         if (state.SequenceEqual(solveState))
         {
-            GetComponent<KMBombModule>().HandlePass();
+            module.HandlePass();
             Debug.LogFormat("[Loopover #{0}] Module solved.", moduleId);
-            Audio.PlaySoundAtTransform("solve", transform);
+            audio.PlaySoundAtTransform("solve", transform);
             moduleSolved = true;
         }
     }
@@ -219,38 +220,18 @@ public class loopover : MonoBehaviour
         currentState[4 + ix * 5] = s4;
     }
 
-    /*[UnityEditor.MenuItem("DoStuff/DoStuff")]
-    public static void DoStuff()
-    {
-      var m = FindObjectOfType<loopover>();
-      var template = m.transform.Find("tiles").Find("tile1").Find("letter1").gameObject;
-      m.tileLetters = new TextMesh[25];
-      m.tileLetters[0] = template.GetComponent<TextMesh>();
-      for (int i = 2; i <= 25; i++)
-      {
-        var obj = Instantiate(template);
-        obj.transform.parent = m.transform.Find("tiles").Find("tile" + i);
-        m.tileLetters[i-1] = obj.GetComponent<TextMesh>();
-        obj.name = "letter" + i;
-        obj.transform.localPosition = template.transform.localPosition;
-        obj.transform.localRotation = template.transform.localRotation;
-        obj.transform.localScale = template.transform.localScale;
-        obj.GetComponent<TextMesh>().text = ((char)('A'+i-1)).ToString();
-      }
-    }*/
-
-    //twitch plays
+    // Twitch Plays
     private bool paramsValid(string[] prms)
     {
         string[] validsRows = { "row1", "row2", "row3", "row4", "row5" };
         string[] validsCols = { "col1", "col2", "col3", "col4", "col5" };
         string[] validsLeftsRights = { "l1", "l2", "l3", "l4", "l5", "r1", "r2", "r3", "r4", "r5" };
         string[] validsUpsDowns = { "u1", "u2", "u3", "u4", "u5", "d1", "d2", "d3", "d4", "d5" };
-        if(prms.Length % 2 != 0)
+        if (prms.Length % 2 != 0)
         {
             return false;
         }
-        for(int i = 1; i < prms.Length; i += 2)
+        for (int i = 1; i < prms.Length; i += 2)
         {
             if (!validsCols.Contains(prms[i - 1]) && !validsRows.Contains(prms[i - 1]))
             {
@@ -258,7 +239,8 @@ public class loopover : MonoBehaviour
             }
             if (validsCols.Contains(prms[i - 1]))
             {
-                if (!validsUpsDowns.Contains(prms[i])){
+                if (!validsUpsDowns.Contains(prms[i]))
+                {
                     return false;
                 }
             }
@@ -273,9 +255,9 @@ public class loopover : MonoBehaviour
         return true;
     }
 
-    #pragma warning disable 414
+#pragma warning disable 414
     private readonly string TwitchHelpMessage = @"!{0} row<#> l/r<#2> [Moves left/right '#2' times in row '#'] | !{0} col<#> u/d<#2> [Moves up/down '#2' times in column '#'] | Commands are chainable, for ex: !{0} row1 l3 col1 d1";
-    #pragma warning restore 414
+#pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
     {
@@ -283,20 +265,21 @@ public class loopover : MonoBehaviour
         if (paramsValid(parameters))
         {
             yield return null;
-            for(int i = 0; i < parameters.Length-1; i++)
+            for (int i = 0; i < parameters.Length - 1; i++)
             {
                 if (parameters[i].EqualsIgnoreCase("col1"))
                 {
                     int temp = 0;
-                    int.TryParse(parameters[i+1].Substring(1, 1), out temp);
-                    if(parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("u"))
+                    int.TryParse(parameters[i + 1].Substring(1, 1), out temp);
+                    if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("u"))
                     {
-                        for(int j = 0; j < temp; j++)
+                        for (int j = 0; j < temp; j++)
                         {
                             negvertibuttons[0].OnInteract();
                             yield return new WaitForSeconds(0.1f);
                         }
-                    }else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("d"))
+                    }
+                    else if (parameters[i + 1].Substring(0, 1).EqualsIgnoreCase("d"))
                     {
                         for (int j = 0; j < temp; j++)
                         {
