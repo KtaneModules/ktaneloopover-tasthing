@@ -29,13 +29,15 @@ public class loopover : MonoBehaviour
 
     sealed class Shift
     {
+        public string[] NextState;
+        public string[] PreviousState;
         public bool Row;
         public int Index;
         public int Direction;
-        public string[] State;
     }
 
     private readonly Queue<Shift> _animationQueue = new Queue<Shift>();
+    private List<Shift> allMoves = new List<Shift>();
 
     KMSelectable.OnInteractHandler buttonHandler(bool row, int index, int direction, KMSelectable arrow, Action<KMSelectable> method)
     {
@@ -44,8 +46,11 @@ public class loopover : MonoBehaviour
             if (!moduleSolved)
             {
                 audio.PlaySoundAtTransform("tick", arrow.transform);
+                var prevState = currentState.ToArray();
                 method(arrow);
-                _animationQueue.Enqueue(new Shift { Row = row, Index = index, Direction = direction, State = currentState.ToArray() });
+                var currentShift = new Shift { Row = row, Index = index, Direction = direction, NextState = currentState.ToArray(), PreviousState = prevState };
+                _animationQueue.Enqueue(currentShift);
+                allMoves.Add(currentShift);
             }
             return false;
         };
@@ -65,7 +70,7 @@ public class loopover : MonoBehaviour
         StartCoroutine(animate());
     }
 
-    private IEnumerator animate()
+    IEnumerator animate()
     {
         while (!moduleSolved)
         {
@@ -78,7 +83,7 @@ public class loopover : MonoBehaviour
             float elapsed = 0;
             if (item.Direction == -1)
             {
-                setBoard(item.State);
+                setBoard(item.NextState);
                 while (elapsed < duration)
                 {
                     for (var i = 0; i < 5; i++)
@@ -110,7 +115,7 @@ public class loopover : MonoBehaviour
                     yield return null;
                     elapsed += Time.deltaTime;
                 }
-                setBoard(item.State);
+                setBoard(item.NextState);
             }
 
             for (var i = 0; i < 25; i++)
@@ -123,19 +128,26 @@ public class loopover : MonoBehaviour
         currentState = solveState.ToArray();
         for (int i = 0; i < 1000; i++)
         {
-            switch (rnd.Range(0, 4))
+            var movement = rnd.Range(0, 4);
+            var movement2 = rnd.Range(0, 5);
+            var prevState = currentState.ToArray();
+            switch (movement)
             {
                 case 0:
-                    negvertiPress(negvertibuttons[rnd.Range(0, 5)]);
+                    negvertiPress(negvertibuttons[movement2]);
+                    allMoves.Add(new Shift { Row = false, Index = movement2, Direction = 1, NextState = currentState.ToArray(), PreviousState = prevState });
                     break;
                 case 1:
-                    posvertiPress(posvertibuttons[rnd.Range(0, 5)]);
+                    posvertiPress(posvertibuttons[movement2]);
+                    allMoves.Add(new Shift { Row = false, Index = movement2, Direction = -1, NextState = currentState.ToArray(), PreviousState = prevState });
                     break;
                 case 2:
-                    neghoriPress(neghoributtons[rnd.Range(0, 5)]);
+                    neghoriPress(neghoributtons[movement2]);
+                    allMoves.Add(new Shift { Row = true, Index = movement2, Direction = -1, NextState = currentState.ToArray(), PreviousState = prevState });
                     break;
                 default:
-                    poshoriPress(poshoributtons[rnd.Range(0, 5)]);
+                    poshoriPress(poshoributtons[movement2]);
+                    allMoves.Add(new Shift { Row = true, Index = movement2, Direction = 1, NextState = currentState.ToArray(), PreviousState = prevState });
                     break;
             }
         }
@@ -154,7 +166,7 @@ public class loopover : MonoBehaviour
         if (state.SequenceEqual(solveState))
         {
             module.HandlePass();
-            Debug.LogFormat("[Loopover #{0}] Module solved.", moduleId);
+            Debug.LogFormat("[Loopover #{0}] Module solved!", moduleId);
             audio.PlaySoundAtTransform("solve", transform);
             moduleSolved = true;
         }
@@ -255,9 +267,9 @@ public class loopover : MonoBehaviour
         return true;
     }
 
-#pragma warning disable 414
+    #pragma warning disable 414
     private readonly string TwitchHelpMessage = @"!{0} row<#> l/r<#2> [Moves left/right '#2' times in row '#'] | !{0} col<#> u/d<#2> [Moves up/down '#2' times in column '#'] | Commands are chainable, for ex: !{0} row1 l3 col1 d1";
-#pragma warning restore 414
+    #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
     {
@@ -478,6 +490,37 @@ public class loopover : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        for (int i = 0; i < allMoves.Count; i++)
+        {
+            var currentShift = allMoves[allMoves.Count - 1 - i];
+            var oppositeShift = new Shift { Row = currentShift.Row, Index = currentShift.Index, Direction = -currentShift.Direction, NextState = currentShift.PreviousState };
+            if (currentShift.Row)
+            {
+                if (currentShift.Direction == 1)
+                    neghoriPress(neghoributtons[currentShift.Index]);
+                else
+                    poshoriPress(poshoributtons[currentShift.Index]);
+            }
+            else
+            {
+                if (currentShift.Direction == -1)
+                    negvertiPress(negvertibuttons[currentShift.Index]);
+                else
+                    posvertiPress(posvertibuttons[currentShift.Index]);
+            }
+            audio.PlaySoundAtTransform("tick", transform);
+            _animationQueue.Enqueue(oppositeShift);
+            yield return new WaitForSeconds(.1f);
+        }
+        while (!moduleSolved)
+        {
+            yield return true;
+            yield return new WaitForSeconds(.1f);
         }
     }
 
